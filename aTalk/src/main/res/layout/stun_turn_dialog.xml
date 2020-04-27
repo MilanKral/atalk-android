@@ -64,6 +64,24 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
+            android:text="@string/service_gui_STUN_EDIT_TURN_PROTOCOL" />
+
+        <Spinner
+            android:id="@+id/TURNProtocol"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:entries="@array/TURN_protocol" />
+
+    </TableRow>
+
+
+    <TableRow>
+
+        <TextView
+            style="@style/MediumFont"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
             android:text="@string/service_gui_STUN_EDIT_TURN_USER" />
 
         <EditText

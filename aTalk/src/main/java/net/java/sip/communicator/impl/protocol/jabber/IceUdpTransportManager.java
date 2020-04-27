@@ -203,7 +203,31 @@ public class IceUdpTransportManager extends TransportManagerJabberImpl implement
         }
         // now create stun server descriptors for whatever other STUN/TURN servers the user may have set.
         for (StunServerDescriptor desc : accID.getStunServers()) {
-            TransportAddress addr = new TransportAddress(desc.getAddress(), desc.getPort(), Transport.UDP);
+            final String protocol = desc.getProtocol();
+            Transport transport;
+            if (protocol.equals(StunServerDescriptor.PROTOCOL_UDP))
+            {
+                transport = Transport.UDP;
+            }
+            else if (protocol.equals(StunServerDescriptor.PROTOCOL_TCP))
+            {
+                transport = Transport.TCP;
+            }
+            else if (protocol.equals(StunServerDescriptor.PROTOCOL_DTLS))
+            {
+                transport = Transport.DTLS;
+            }
+            else if (protocol.equals(StunServerDescriptor.PROTOCOL_TLS))
+            {
+                transport = Transport.TLS;
+            }
+            else
+            {
+                Timber.w("Unknown protocol %s", protocol);
+                transport = Transport.UDP;
+            }
+
+            TransportAddress addr = new TransportAddress(desc.getAddress(), desc.getPort(), transport);
 
             // if we get STUN server from automatic discovery, it may just be server name (i.e.
             // stun.domain.org) and it may be possible that it cannot be resolved

@@ -79,11 +79,13 @@ public class StunTurnDialogFragment extends DialogFragment
         TextView portView = contentView.findViewById(R.id.serverPort);
         final TextView turnUserView = contentView.findViewById(R.id.usernameField);
         final TextView passwordView = contentView.findViewById(R.id.passwordField);
+        final Spinner protocolSpinner = contentView.findViewById(R.id.TURNProtocol);
 
         CompoundButton useTurnButton = contentView.findViewById(R.id.useTurnCheckbox);
         useTurnButton.setOnCheckedChangeListener((cButton, b) -> {
             turnUserView.setEnabled(b);
             passwordView.setEnabled(b);
+            protocolSpinner.setEnabled(b);
         });
 
         if (descriptor != null) {
@@ -94,6 +96,16 @@ public class StunTurnDialogFragment extends DialogFragment
             turnUserView.setText(new String(descriptor.getUsername()));
             passwordView.setText(new String(descriptor.getPassword()));
             useTurnButton.setChecked(descriptor.isTurnSupported());
+
+            final String protocolText = convertTURNProtocolTypeToText(descriptor.getProtocol());
+            final String [] protocolArray = getResources().getStringArray(R.array.TURN_protocol);
+            for (int i = 0; i < protocolArray.length; i++)
+            {
+                if (protocolText.equals(protocolArray[i]))
+                {
+                    protocolSpinner.setSelection(i);
+                }
+            }
         }
         else
             portView.setText(DEFAULT_STUN_PORT);
@@ -102,6 +114,7 @@ public class StunTurnDialogFragment extends DialogFragment
         turnUserView.setEnabled(isTurnSupported);
         passwordView.setEnabled(isTurnSupported);
         useTurnButton.setChecked(isTurnSupported);
+        protocolSpinner.setEnabled(isTurnSupported);
 
         final AlertDialog dialog = builder.create();
         dialog.setOnShowListener(dialogInterface -> {
@@ -137,6 +150,9 @@ public class StunTurnDialogFragment extends DialogFragment
         String turnUser = ViewUtil.toString(dialog.findViewById(R.id.usernameField));
         String password = ViewUtil.toString(dialog.findViewById(R.id.passwordField));
 
+        final Spinner protocolSpinner = dialog.findViewById(R.id.TURNProtocol);
+        final String protocol = convertTURNProtocolTextToType((String) protocolSpinner.getSelectedItem());
+
         if ((ipAddress == null) || (portStr == null)) {
             aTalkApp.showToastMessage("The ip and port can not be empty");
             return false;
@@ -145,7 +161,7 @@ public class StunTurnDialogFragment extends DialogFragment
 
         // Create descriptor if new entry
         if (descriptor == null) {
-            descriptor = new StunServerDescriptor(ipAddress, port, useTurn, turnUser, password);
+            descriptor = new StunServerDescriptor(ipAddress, port, useTurn, turnUser, password, protocol);
             parentAdapter.addServer(descriptor);
         }
         else {
@@ -154,8 +170,48 @@ public class StunTurnDialogFragment extends DialogFragment
             descriptor.setTurnSupported(useTurn);
             descriptor.setUsername(turnUser);
             descriptor.setPassword(password);
+            descriptor.setProtocol(protocol);
             parentAdapter.updateServer(descriptor);
         }
         return true;
+    }
+
+
+    private static String convertTURNProtocolTypeToText(final String t)
+    {
+        if (t.equals(StunServerDescriptor.PROTOCOL_UDP)) {
+            return "UDP";
+        }
+        else if (t.equals(StunServerDescriptor.PROTOCOL_TCP)) {
+            return "TCP";
+        }
+        else if (t.equals(StunServerDescriptor.PROTOCOL_DTLS)) {
+            return "DTLS";
+        }
+        else if (t.equals(StunServerDescriptor.PROTOCOL_TLS)) {
+            return "TLS";
+        }
+        else {
+            throw new IllegalArgumentException("unknown TURN protocol");
+        }
+    }
+
+    private static String convertTURNProtocolTextToType(final String protocolText)
+    {
+        if (protocolText.equals("UDP")) {
+            return StunServerDescriptor.PROTOCOL_UDP;
+        }
+        else if (protocolText.equals("TCP")) {
+            return StunServerDescriptor.PROTOCOL_TCP;
+        }
+        else if (protocolText.equals("DTLS")) {
+            return StunServerDescriptor.PROTOCOL_DTLS;
+        }
+        else if (protocolText.equals("TLS")) {
+            return StunServerDescriptor.PROTOCOL_TLS;
+        }
+        else {
+            throw new IllegalArgumentException("unknown TURN protocol");
+        }
     }
 }

@@ -15,6 +15,7 @@ import static net.java.sip.communicator.service.protocol.ProtocolProviderFactory
 import static net.java.sip.communicator.service.protocol.ProtocolProviderFactory.STUN_PASSWORD;
 import static net.java.sip.communicator.service.protocol.ProtocolProviderFactory.STUN_PORT;
 import static net.java.sip.communicator.service.protocol.ProtocolProviderFactory.STUN_USERNAME;
+import static net.java.sip.communicator.service.protocol.ProtocolProviderFactory.STUN_TURN_PROTOCOL;
 
 /**
  * A <tt>StunServerDescriptor</tt> stores information necessary to create a STUN or TURN candidate
@@ -42,6 +43,16 @@ public class StunServerDescriptor implements Serializable
      * TCP protocol.
      */
     public static final String PROTOCOL_TCP = "tcp";
+
+    /**
+     * UDP with DTLS protocol.
+     */
+    public static final String PROTOCOL_DTLS = "dtls";
+
+    /**
+     * TCP with TLS protocol.
+     */
+    public static final String PROTOCOL_TLS = "tls";
 
     /**
      * TCP with SSL protocol (only for Google Talk TURN server).
@@ -93,13 +104,14 @@ public class StunServerDescriptor implements Serializable
      * @param username the user name for authenticating
      * @param password the password
      */
-    public StunServerDescriptor(String address, int port, boolean supportTurn, String username, String password)
+    public StunServerDescriptor(String address, int port, boolean supportTurn, String username, String password, String protocol)
     {
         this.address = address;
         this.port = port;
         this.isTurnSupported = supportTurn;
         this.username = (username != null) ? StringUtils.getUTF8Bytes(username) : "".getBytes();
         this.password = (password != null) ? StringUtils.getUTF8Bytes(password) : "".getBytes();
+        this.protocol = protocol;
     }
 
     /**
@@ -229,6 +241,8 @@ public class StunServerDescriptor implements Serializable
             props.put(namePrefix + STUN_PASSWORD, new String(getPassword()));
         }
         props.put(namePrefix + STUN_IS_TURN_SUPPORTED, Boolean.toString(isTurnSupported()));
+
+        props.put(namePrefix + STUN_TURN_PROTOCOL, getProtocol());
     }
 
     /**
@@ -260,8 +274,16 @@ public class StunServerDescriptor implements Serializable
 
         String stunUsername = props.get(namePrefix + STUN_USERNAME);
         String stunPassword = props.get(namePrefix + STUN_PASSWORD);
+
         boolean stunIsTurnSupported = Boolean.parseBoolean(props.get(namePrefix + STUN_IS_TURN_SUPPORTED));
-        return new StunServerDescriptor(stunAddress, stunPort, stunIsTurnSupported, stunUsername, stunPassword);
+
+        String stunTURNprotocol = props.get(namePrefix + STUN_TURN_PROTOCOL);
+        if (stunTURNprotocol == null)
+        {
+            stunTURNprotocol = StunServerDescriptor.PROTOCOL_UDP;
+        }
+
+        return new StunServerDescriptor(stunAddress, stunPort, stunIsTurnSupported, stunUsername, stunPassword, stunTURNprotocol);
     }
 
     /**

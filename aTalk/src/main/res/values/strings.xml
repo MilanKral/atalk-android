@@ -1165,6 +1165,7 @@
     <string name="service_gui_STUN_EDIT_PORT">Server port</string>
     <string name="service_gui_STUN_EDIT_SUPPORT_TURN">Support TURN</string>
     <string name="service_gui_STUN_EDIT_TURN_USER">TURN username</string>
+    <string name="service_gui_STUN_EDIT_TURN_PROTOCOL">TURN protocol</string>
 
     <!-- Security preferences -->
     <string name="service_gui_PREF_SECURITY_ENCRYPTION">Enable call encryption</string>
